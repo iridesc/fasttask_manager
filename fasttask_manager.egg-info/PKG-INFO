@@ -1,0 +1,14 @@
+Metadata-Version: 2.1
+Name: fasttask-manager
+Version: 0.0.2
+Summary: fasttask's manager 
+Home-page: https://github.com/iridesc/fasttask_manager
+Author: Irid
+Author-email: irid.zzy@gmail.com
+Classifier: Programming Language :: Python :: 3
+Classifier: License :: OSI Approved :: MIT License
+Classifier: Operating System :: OS Independent
+Description-Content-Type: text/markdown
+License-File: LICENSE
+
+manager for [fasttask](https://github.com/iridesc/fasttask) 
