@@ -2,6 +2,7 @@ LICENSE
 README.md
 setup.py
 fasttask_manager/__init__.py
+fasttask_manager/create_project.py
 fasttask_manager/manager.py
 fasttask_manager.egg-info/PKG-INFO
 fasttask_manager.egg-info/SOURCES.txt
