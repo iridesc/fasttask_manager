@@ -9,3 +9,10 @@ fasttask_manager.egg-info/SOURCES.txt
 fasttask_manager.egg-info/dependency_links.txt
 fasttask_manager.egg-info/requires.txt
 fasttask_manager.egg-info/top_level.txt
+fasttask_manager/project/Dockerfile
+fasttask_manager/project/docker-compose.yml
+fasttask_manager/project/req.txt
+fasttask_manager/project/tasks/get_circle_area.py
+fasttask_manager/project/tasks/get_hypotenuse.py
+fasttask_manager/project/tasks/packages/__init__.py
+fasttask_manager/project/tasks/packages/tools.py

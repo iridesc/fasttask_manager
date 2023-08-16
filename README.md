@@ -3,7 +3,7 @@ manager for [fasttask](https://github.com/iridesc/fasttask)
 ### create project 
 
 ```bash
-python -m fasttask_manager.start_project
+python -m fasttask_manager.create_project
 ```
 
 

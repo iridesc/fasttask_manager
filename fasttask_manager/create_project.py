@@ -1,5 +1,6 @@
 import os
 import shutil
+from venv import create
 
 
 def get_int_input_or_default(name, default):
@@ -23,7 +24,7 @@ def replace_file_content(file, replace_dict):
     write_file(content, file)
 
 
-def start_project():
+def create_project():
     project_name = input("project name:")
     port = get_int_input_or_default("port", 80)
     # worker_amount = get_int_input_or_default("worker_amount", 16)
@@ -35,4 +36,4 @@ def start_project():
 
 
 if __name__ == "__main__":
-    start_project()
+    create_project()

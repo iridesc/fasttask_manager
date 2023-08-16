@@ -41,7 +41,7 @@ class Manager:
 
     def create_task(self, params: dict) -> dict:
         self.logger.info(f"{self.log_prefix}: task creating...")
-        return self._req(path=f"/create/{self.task_name}/", data=params)
+        return self._req(path=f"/create/{self.task_name}/", data=params)["id"]
 
     def check(self, result_id: str) -> dict:
         resp = self._req(path=f"/check/{self.task_name}/", data={"result_id": result_id}, method="g")
@@ -53,7 +53,7 @@ class Manager:
         resp = self.create_task(params)
 
         if resp["state"] != "PENDING":
-            raise Exception(f"create task error: state unexpected: {resp['state']}")
+            raise Exception(f"create task error: state unexpected: {resp}")
 
         result_id = resp["id"]
 
