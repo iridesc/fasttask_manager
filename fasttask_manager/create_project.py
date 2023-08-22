@@ -33,6 +33,7 @@ def create_project():
 
     shutil.copytree(os.path.join(fasttask_path, "project"), f"{project_name}")
     replace_file_content(f"{project_name}/docker-compose.yml", {"project_name": project_name, "port": port})
+    replace_file_content(f"{project_name}/setting.py", {"project_name": project_name, "port": port})
 
 
 if __name__ == "__main__":
