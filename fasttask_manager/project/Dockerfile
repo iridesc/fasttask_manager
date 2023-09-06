@@ -4,6 +4,7 @@ FROM irid/fasttask
 # ---
 
 # ---
+WORKDIR /fasttask
 COPY req.txt req.txt
 RUN pip install -r req.txt
 COPY setting.py setting.py
