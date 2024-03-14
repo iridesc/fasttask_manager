@@ -8,13 +8,13 @@ from requests.auth import HTTPBasicAuth
 class Manager:
     def __init__(self, host: str, task_name: str, protocol: str = "http", port: int = 80, check_gap: int = 15,
                  tries: int = 5, delay: int = 3, logger: Logger = None, log_prefix: str = "",
-                 auth_user: str = "", auth_passwd: str = "") -> None:
+                 auth_user: str = "", auth_passwd: str = "", url_base_path: str = "") -> None:
 
         self.task_name = task_name
         self.protocol = protocol
         self.host = host
         self.port = port
-        self.url = f"{self.protocol}://{self.host}:{self.port}"
+        self.url = f"{self.protocol}://{self.host}:{self.port}{url_base_path}"
         self.tries = tries
         self.delay = delay
         self.check_gap = check_gap
