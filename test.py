@@ -5,7 +5,7 @@ if __name__ == "__main__":
     m = Manager(
         "127.0.0.1",
         task_name="get_hypotenuse",
-        port=9001,
+        port=80,
         auth_user="john wick",
         auth_passwd="john_passwd",
     )

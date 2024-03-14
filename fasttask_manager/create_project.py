@@ -1,6 +1,5 @@
 import os
 import shutil
-from venv import create
 
 
 def get_int_input_or_default(name, default):

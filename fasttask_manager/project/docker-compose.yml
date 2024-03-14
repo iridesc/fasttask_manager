@@ -6,8 +6,6 @@ services:
     container_name: {project_name} 
     restart: always
     command: sh run.sh
-    depends_on:
-      - redis
     ports:
           - "{port}:80"
     
