@@ -1,5 +1,5 @@
 Metadata-Version: 2.1
-Name: fasttask-manager
+Name: fasttask_manager
 Version: 0.1.7
 Summary: fasttask's manager 
 Home-page: https://github.com/iridesc/fasttask_manager
@@ -10,6 +10,8 @@ Classifier: License :: OSI Approved :: MIT License
 Classifier: Operating System :: OS Independent
 Description-Content-Type: text/markdown
 License-File: LICENSE
+Requires-Dist: retry
+Requires-Dist: requests
 
 manager for [fasttask](https://github.com/iridesc/fasttask) 
 

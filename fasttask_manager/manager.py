@@ -47,14 +47,14 @@ class Manager:
         return req()
 
     def run(self, params: dict) -> dict:
-        return self._req(path=f"/run/{self.task_name}/", data=params)
+        return self._req(path=f"/run/{self.task_name}", data=params)
 
     def create_task(self, params: dict) -> dict:
         self.logger.info(f"{self.log_prefix}: task creating...")
-        return self._req(path=f"/create/{self.task_name}/", data=params)
+        return self._req(path=f"/create/{self.task_name}", data=params)
 
     def check(self, result_id: str) -> dict:
-        resp = self._req(path=f"/check/{self.task_name}/", data={"result_id": result_id}, method="g")
+        resp = self._req(path=f"/check/{self.task_name}", data={"result_id": result_id}, method="g")
         self.logger.info(f"{self.log_prefix}: check task: {resp['state']}")
         return resp
 

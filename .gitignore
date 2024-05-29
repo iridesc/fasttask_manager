@@ -3,3 +3,4 @@ build/*
 *.pyc
 env
 .venv
+test_project/*
