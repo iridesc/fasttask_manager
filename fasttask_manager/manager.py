@@ -71,13 +71,10 @@ class Manager:
         start = time.time()
         resp = self.create_task(params)
 
-        if resp["state"] != "PENDING":
-            raise Exception(f"create task error: state unexpected: {resp}")
-
-        result_id = resp["id"]
+        self.logger.info(f"{self.log_prefix} cost: {time.time() - start} create_task resp: {resp}")
 
         while True:
-            resp = self.check(result_id=result_id)
+            resp = self.check(result_id=resp["id"])
             if resp["state"] == "FAILURE":
                 self.logger.info(f"{self.log_prefix} cost: {time.time()-start}")
                 raise Exception(f"task :{resp['result']}")
