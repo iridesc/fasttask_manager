@@ -8,12 +8,12 @@ def get_int_input_or_default(name, default):
 
 
 def read_file(file):
-    with open(file) as f:
+    with open(file, encoding="utf-8") as f:
         return f.read()
 
 
 def write_file(content, file):
-    with open(file, "w") as f:
+    with open(file, "w", encoding="utf-8") as f:
         f.write(content)
 
 
