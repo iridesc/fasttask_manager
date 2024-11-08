@@ -8,7 +8,7 @@ from requests.auth import HTTPBasicAuth
 class Manager:
     def __init__(self, host: str, task_name: str, protocol: str = "http", port: int = 80, check_gap: int = 15,
                  tries: int = 5, delay: int = 3, logger: Logger = None, log_prefix: str = "",
-                 auth_user: str = "", auth_passwd: str = "", url_base_path: str = "") -> None:
+                 auth_user: str = "", auth_passwd: str = "", url_base_path: str = "", req_timeout=30) -> None:
 
         self.task_name = task_name
         self.protocol = protocol
@@ -21,6 +21,7 @@ class Manager:
         self.logger = logger
         self.log_prefix = f"{log_prefix}{self.task_name}:"
         self.auth = HTTPBasicAuth(auth_user, auth_passwd)
+        self.req_timeout = req_timeout
         if self.logger:
             return
 
@@ -35,7 +36,8 @@ class Manager:
                 "auth": self.auth,
                 "files": None if not file else {
                     'file': open(file, 'rb')
-                }
+                },
+                "timeout": self.req_timeout,
             }
             if method == "p":
                 r = requests.post(json=data, **params)
