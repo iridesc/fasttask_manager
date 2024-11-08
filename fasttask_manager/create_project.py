@@ -34,7 +34,6 @@ def create_project():
     replace_dict = {"project_name": project_name, "port": port}
 
     replace_file_content(f"{project_name}/docker-compose.yml", replace_dict)
-    replace_file_content(f"{project_name}/setting.py", replace_dict)
 
 
 if __name__ == "__main__":
