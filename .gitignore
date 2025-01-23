@@ -4,3 +4,4 @@ build/*
 env
 .venv
 test_project/*
+fasttask_manager.egg-info/*
