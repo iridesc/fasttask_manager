@@ -1,5 +1,6 @@
 import time
 import requests
+import traceback
 from retry import retry
 from logging import Logger, StreamHandler
 from requests.auth import HTTPBasicAuth
@@ -8,7 +9,9 @@ from requests.auth import HTTPBasicAuth
 class Manager:
     def __init__(self, host: str, task_name: str, protocol: str = "http", port: int = 80, check_gap: int = 15,
                  tries: int = 5, delay: int = 3, logger: Logger = None, log_prefix: str = "",
-                 auth_user: str = "", auth_passwd: str = "", url_base_path: str = "", req_timeout=30) -> None:
+                 auth_user: str = "", auth_passwd: str = "", url_base_path: str = "", req_timeout=30, 
+                 simple_error_log=True
+                 ) -> None:
 
         self.task_name = task_name
         self.protocol = protocol
@@ -22,6 +25,7 @@ class Manager:
         self.log_prefix = f"{log_prefix}{self.task_name}:"
         self.auth = HTTPBasicAuth(auth_user, auth_passwd)
         self.req_timeout = req_timeout
+        self.simple_error_log = simple_error_log
         if self.logger:
             return
 
@@ -39,12 +43,20 @@ class Manager:
                 },
                 "timeout": self.req_timeout,
             }
-            if method == "p":
-                r = requests.post(json=data, **params)
-            elif method == "g":
-                r = requests.get(params=data, **params)
-
-            r.raise_for_status()
+            try:
+                if method == "p":
+                    r = requests.post(json=data, **params)
+                elif method == "g":
+                    r = requests.get(params=data, **params)
+                else:
+                    raise Exception("method must be p or g")
+                r.raise_for_status()
+            except Exception as e:
+                error = str(e) if self.simple_error_log else traceback.format_exc()
+                self.logger.error(
+                    f"{self.log_prefix}: url={params['url']} error={error}"
+                )
+                raise e
             return r if raw_resp else r.json()
         return req()
 
