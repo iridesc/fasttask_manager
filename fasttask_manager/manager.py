@@ -21,11 +21,12 @@ class Manager:
         self.tries = tries
         self.delay = delay
         self.check_gap = check_gap
-        self.logger = logger
-        self.log_prefix = f"{log_prefix}{self.task_name}:"
+        self.log_prefix = f"{log_prefix} url={self.url} task_name={self.task_name}"
         self.auth = HTTPBasicAuth(auth_user, auth_passwd)
         self.req_timeout = req_timeout
         self.simple_error_log = simple_error_log
+
+        self.logger = logger
         if self.logger:
             return
 

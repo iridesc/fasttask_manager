@@ -5,7 +5,7 @@ with open("README.md", "r") as fh:
 
 setuptools.setup(
     name="fasttask_manager",
-    version="0.2.3",
+    version="0.2.4",
     author="Irid",
     author_email="irid.zzy@gmail.com",
     description="fasttask's manager ",
