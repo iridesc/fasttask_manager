@@ -10,7 +10,7 @@ class Manager:
     def __init__(self, host: str, task_name: str, protocol: str = "http", port: int = 80, check_gap: int = 15,
                  tries: int = 5, delay: int = 3, logger: Logger = None, log_prefix: str = "",
                  auth_user: str = "", auth_passwd: str = "", url_base_path: str = "", req_timeout=30, 
-                 simple_error_log=True
+                 simple_error_log=True, verify_ssl=False,
                  ) -> None:
 
         self.task_name = task_name
@@ -25,6 +25,10 @@ class Manager:
         self.auth = HTTPBasicAuth(auth_user, auth_passwd)
         self.req_timeout = req_timeout
         self.simple_error_log = simple_error_log
+        self.verify_ssl = verify_ssl
+        if not self.verify_ssl:
+            import urllib3
+            urllib3.disable_warnings()
 
         self.logger = logger
         if self.logger:
@@ -43,6 +47,7 @@ class Manager:
                     'file': open(file, 'rb')
                 },
                 "timeout": self.req_timeout,
+                "verify": self.verify_ssl,
             }
             try:
                 if method == "p":
@@ -81,6 +86,9 @@ class Manager:
         with open(local_path, "wb") as f:
             for chunk in r.iter_content(chunk_size=512):
                 f.write(chunk)
+
+    def revoke(self, result_id: str) -> dict:
+        return self._req(path="/revoke", data={"result_id": result_id})
 
     def create_and_wait_result(self, params: dict) -> dict:
         start = time.time()
