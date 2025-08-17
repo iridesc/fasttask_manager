@@ -39,6 +39,7 @@ if __name__ == "__main__":
     r = m.revoke(result_id)
     print(f"m.revoke {r=}")
     r = m.check(result_id)
+    print(f"m.revoke check {r=}")
     assert r["state"] == "REVOKED"
     print("---------------------")
 
