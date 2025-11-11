@@ -28,13 +28,14 @@ def create_project():
     project_name = input("project name:")
     port = get_int_input_or_default("port", 443)
     fasttask_path = os.path.abspath(os.path.dirname(__file__))
-
     shutil.copytree(os.path.join(fasttask_path, "project"), f"{project_name}")
-
     replace_dict = {"project_name": project_name, "port": port}
-
     replace_file_content(f"{project_name}/docker-compose.yml", replace_dict)
     replace_file_content(f"{project_name}/setting.py", replace_dict)
+    shutil.rmtree(f"{project_name}/__pycache__")
+    shutil.rmtree(f"{project_name}/tasks/__pycache__")
+    shutil.rmtree(f"{project_name}/tasks/packages/__pycache__")
+    print(f"{project_name} created")
 
 
 if __name__ == "__main__":
