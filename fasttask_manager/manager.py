@@ -1,5 +1,4 @@
 import time
-from venv import logger
 import requests
 import traceback
 from retry import retry
@@ -11,10 +10,8 @@ class Manager:
     def __init__(
         self,
         host: str,
-        task_name: str,
         protocol: str = "http",
         port: int = 80,
-        check_gap: int = 15,
         tries: int = 5,
         delay: int = 3,
         logger: Logger = None,
@@ -26,15 +23,16 @@ class Manager:
         simple_error_log=True,
         verify_ssl=False,
     ) -> None:
-        self.task_name = task_name
         self.protocol = protocol
         self.host = host
         self.port = port
         self.url = f"{self.protocol}://{self.host}:{self.port}{url_base_path}"
         self.tries = tries
         self.delay = delay
-        self.check_gap = check_gap
-        self.log_prefix = f"{log_prefix} url={self.url} task_name={self.task_name}"
+
+        self.log_prefix = (
+            log_prefix if log_prefix else f"fasttask_server={self.host}:{self.port}"
+        )
         self.auth = HTTPBasicAuth(auth_user, auth_passwd)
         self.req_timeout = req_timeout
         self.simple_error_log = simple_error_log
@@ -44,12 +42,11 @@ class Manager:
 
             urllib3.disable_warnings()
 
-        self.logger = logger
-        if self.logger:
-            return
-
-        self.logger = Logger(task_name)
-        self.logger.addHandler(StreamHandler())
+        if logger:
+            self.logger = logger
+        else:
+            self.logger = Logger(f"fasttask_server_{self.host}:{self.port}")
+            self.logger.addHandler(StreamHandler())
 
     def _req(
         self,
@@ -58,14 +55,29 @@ class Manager:
         method="p",
         file: str = None,
         raw_resp: bool = False,
+        tries=None,
+        delay=None,
+        req_timeout=None,
+        logger=None,
+        log_prefix=None,
+        simple_error_log=None,
     ):
-        @retry(tries=self.tries, delay=self.delay)
+        tries = tries or self.tries
+        delay = delay or self.delay
+        req_timeout = req_timeout or self.req_timeout
+        logger = logger or self.logger
+        log_prefix = log_prefix or self.log_prefix
+        simple_error_log = (
+            self.simple_error_log if simple_error_log is None else simple_error_log
+        )
+
+        @retry(tries=tries, delay=delay)
         def req():
             params = {
                 "url": f"{self.url}{path}",
                 "auth": self.auth,
                 "files": None if not file else {"file": open(file, "rb")},
-                "timeout": self.req_timeout,
+                "timeout": req_timeout,
                 "verify": self.verify_ssl,
             }
 
@@ -78,63 +90,215 @@ class Manager:
                     r = requests.get(params=data, **params)
                 else:
                     raise Exception("method must be p or g")
+                logger.info(
+                    f"{log_prefix}: url={params['url']} status_code={r.status_code=}  cost={round(time.time() - req_start)}s"
+                )
                 r.raise_for_status()
             except Exception as e:
-                error = str(e) if self.simple_error_log else traceback.format_exc()
-                self.logger.error(
-                    f"{self.log_prefix}: url={params['url']} error={error}"
+                error = str(e) if simple_error_log else traceback.format_exc()
+
+                logger.info(
+                    f"{log_prefix}: url={params['url']}  cost={round(time.time() - req_start)}s error={error}"
                 )
                 raise e
-            finally:
-                logger.info(f"{self.log_prefix}: cost={int(time.time() - req_start)}s")
+    
             return r if raw_resp else r.json()
 
         return req()
 
-    def run(self, params: dict) -> dict:
-        return self._req(path=f"/run/{self.task_name}", data=params)
-
-    def create_task(self, params: dict) -> dict:
-        self.logger.info(f"{self.log_prefix}: task creating...")
-        return self._req(path=f"/create/{self.task_name}", data=params)
-
-    def check(self, result_id: str) -> dict:
-        resp = self._req(
-            path=f"/check/{self.task_name}", data={"result_id": result_id}, method="g"
+    def run(
+        self,
+        task_name: str,
+        params: dict,
+        tries=None,
+        delay=None,
+        req_timeout=None,
+        logger=None,
+        log_prefix=None,
+        simple_error_log=None,
+    ) -> dict:
+        return self._req(
+            path=f"/run/{task_name}",
+            data=params,
+            tries=tries,
+            delay=delay,
+            req_timeout=req_timeout,
+            logger=logger,
+            log_prefix=log_prefix,
+            simple_error_log=simple_error_log,
         )
-        self.logger.info(f"{self.log_prefix}: check task: {resp['state']}")
+
+    def create_task(
+        self,
+        task_name: str,
+        params: dict,
+        tries=None,
+        delay=None,
+        req_timeout=None,
+        logger=None,
+        log_prefix=None,
+        simple_error_log=None,
+    ) -> dict:
+        self.logger.info(
+            f"{self.log_prefix if log_prefix is None else log_prefix}: task creating..."
+        )
+        return self._req(
+            path=f"/create/{task_name}",
+            data=params,
+            tries=tries,
+            delay=delay,
+            req_timeout=req_timeout,
+            logger=logger,
+            log_prefix=log_prefix,
+            simple_error_log=simple_error_log,
+        )
+
+    def check(
+        self,
+        task_name,
+        result_id: str,
+        tries=None,
+        delay=None,
+        req_timeout=None,
+        logger=None,
+        log_prefix=None,
+        simple_error_log=None,
+    ) -> dict:
+        resp = self._req(
+            path=f"/check/{task_name}",
+            data={"result_id": result_id},
+            method="g",
+            tries=tries,
+            delay=delay,
+            req_timeout=req_timeout,
+            logger=logger,
+            log_prefix=log_prefix,
+            simple_error_log=simple_error_log,
+        )
+        self.logger.info(
+            f"{self.log_prefix if log_prefix is None else log_prefix}: check task: {resp['state']}"
+        )
         return resp
 
-    def upload(self, file_path) -> str:
-        return self._req("/upload", method="p", file=file_path)["file_name"]
+    def upload(
+        self,
+        file_path,
+        tries=None,
+        delay=None,
+        req_timeout=None,
+        logger=None,
+        log_prefix=None,
+        simple_error_log=None,
+    ) -> str:
+        return self._req(
+            "/upload",
+            method="p",
+            file=file_path,
+            tries=tries,
+            delay=delay,
+            req_timeout=req_timeout,
+            logger=logger,
+            log_prefix=log_prefix,
+            simple_error_log=simple_error_log,
+        )["file_name"]
 
-    def download(self, file_name, local_path):
+    def download(
+        self,
+        file_name,
+        local_path,
+        tries=None,
+        delay=None,
+        req_timeout=None,
+        logger=None,
+        log_prefix=None,
+        simple_error_log=None,
+    ):
         r = self._req(
-            "/download", data={"file_name": file_name}, method="g", raw_resp=True
+            "/download",
+            data={"file_name": file_name},
+            method="g",
+            raw_resp=True,
+            tries=tries,
+            delay=delay,
+            req_timeout=req_timeout,
+            logger=logger,
+            log_prefix=log_prefix,
+            simple_error_log=simple_error_log,
         )
         with open(local_path, "wb") as f:
             for chunk in r.iter_content(chunk_size=512):
                 f.write(chunk)
 
-    def revoke(self, result_id: str) -> dict:
-        return self._req(path="/revoke", data={"result_id": result_id})
+    def revoke(
+        self,
+        result_id: str,
+        tries=None,
+        delay=None,
+        req_timeout=None,
+        logger=None,
+        log_prefix=None,
+        simple_error_log=None,
+    ) -> dict:
+        return self._req(
+            path="/revoke",
+            data={"result_id": result_id},
+            tries=tries,
+            delay=delay,
+            req_timeout=req_timeout,
+            logger=logger,
+            log_prefix=log_prefix,
+            simple_error_log=simple_error_log,
+        )
 
-    def create_and_wait_result(self, params: dict) -> dict:
+    def create_and_wait_result(
+        self,
+        task_name: str,
+        params: dict,
+        check_gap: int = 15,
+        tries=None,
+        delay=None,
+        req_timeout=None,
+        logger=None,
+        log_prefix=None,
+        simple_error_log=None,
+    ) -> dict:
         start = time.time()
-        resp = self.create_task(params)
+        resp = self.create_task(
+            task_name,
+            params,
+            tries=tries,
+            delay=delay,
+            req_timeout=req_timeout,
+            logger=logger,
+            log_prefix=log_prefix,
+            simple_error_log=simple_error_log,
+        )
 
         self.logger.info(
-            f"{self.log_prefix} cost: {time.time() - start} create_task resp: {resp}"
+            f"{self.log_prefix if log_prefix is None else log_prefix} cost: {time.time() - start} create_task resp: {resp}"
         )
 
         while True:
-            resp = self.check(result_id=resp["id"])
+            resp = self.check(
+                task_name,
+                result_id=resp["id"],
+                tries=tries,
+                delay=delay,
+                req_timeout=req_timeout,
+                logger=logger,
+                log_prefix=log_prefix,
+                simple_error_log=simple_error_log,
+            )
             if resp["state"] == "FAILURE":
-                self.logger.info(f"{self.log_prefix} cost: {time.time() - start}")
+                self.logger.info(
+                    f"{self.log_prefix if log_prefix is None else log_prefix} cost: {time.time() - start}"
+                )
                 raise Exception(f"task :{resp['result']}")
 
             elif resp["state"] == "SUCCESS":
-                self.logger.info(f"{self.log_prefix} cost: {time.time() - start}")
+                self.logger.info(
+                    f"{self.log_prefix if log_prefix is None else log_prefix} cost: {time.time() - start}"
+                )
                 return resp["result"]
 
-            time.sleep(self.check_gap)
+            time.sleep(check_gap)
