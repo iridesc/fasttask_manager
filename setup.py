@@ -5,7 +5,7 @@ with open("README.md", "r") as fh:
 
 setuptools.setup(
     name="fasttask_manager",
-    version="0.2.7",
+    version="0.4.0",
     author="Irid",
     author_email="irid.zzy@gmail.com",
     description="fasttask's manager ",
@@ -14,17 +14,11 @@ setuptools.setup(
     url="https://github.com/iridesc/fasttask_manager",
     packages=setuptools.find_packages(),
     # include_package_data=True,
-    package_data={
-        '': ['project/*', 'project/tasks/*', 'project/tasks/packages/*']
-    },
-
+    package_data={"": ["project/*", "project/tasks/*", "project/tasks/packages/*"]},
     classifiers=[
         "Programming Language :: Python :: 3",
         "License :: OSI Approved :: MIT License",
         "Operating System :: OS Independent",
     ],
-    install_requires=[
-        "retry",
-        "requests"
-    ],
+    install_requires=["retry", "requests", "httpx", "tenacity"],
 )
