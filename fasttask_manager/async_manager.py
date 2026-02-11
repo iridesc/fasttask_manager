@@ -256,6 +256,10 @@ class AsyncManager:
             # 2. 异步检查状态
             resp = await self.check(task_name, result_id=resp["id"], **kwargs)
 
+            self.logger.info(
+                    f"{log_prefix if log_prefix is not None else self.log_prefix} {resp=}"
+                )
+
             # 3. 检查状态
             if resp["state"] == "FAILURE":
                 self.logger.info(
