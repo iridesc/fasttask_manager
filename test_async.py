@@ -1,6 +1,7 @@
 import os
 import asyncio
 import logging
+from re import DEBUG
 import trace
 import traceback
 from fasttask_manager import AsyncManager  # 假设 AsyncManager 在这里
@@ -103,5 +104,7 @@ async def async_test_suite():
 
 
 if __name__ == "__main__":
-    asyncio.run(async_test_suite())
-    logger.info("所有测试脚本执行完毕。")
+    for debug in [True, False]:
+        os.environ["ASYNCMANAGER_DEBUG"]  = str(debug)
+        asyncio.run(async_test_suite())
+        logger.info("所有测试脚本执行完毕。")
